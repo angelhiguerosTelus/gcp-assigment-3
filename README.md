@@ -1,5 +1,5 @@
 
-##  crear las VMS
+##  Crear las VMS
 ```sh
 #!/usr/bin/env bash
 
@@ -11,21 +11,10 @@ gcloud compute instances create app1 \
     --image-project debian-cloud \
     --tags webapp \
     --metadata startup-script="#! /bin/bash
-        sudo apt update -y; 
-        sudo apt install docker.io -y; 
-        sudo chmod 666 /var/run/docker.sock; 
-        docker network create mynetworkgcp
-
-        docker run \
-                -it \
-                --rm \
-                -v ${PWD}:/app \
-                -v /app/node_modules \
-                --network mynetworkgcp \
-                -p 80:3000 \
-                -e CHOKIDAR_USEPOLLING=true \
-                -e REACT_APP_VM=VM1 \
-                assigment4
+        sudo apt-get update
+        sudo apt-get install apache2 -y
+        sudo service apache2 restart
+        echo '<!doctype html><html><body><h1>VM 1</h1></body></html>' | tee /var/www/html/index.html
     "
 
 echo '> Creando VM 2...'
@@ -34,21 +23,10 @@ gcloud compute instances create app2 \
     --image-project debian-cloud \
     --tags webapp \
     --metadata startup-script="#! /bin/bash
-        sudo apt update -y; 
-        sudo apt install docker.io -y; 
-        sudo chmod 666 /var/run/docker.sock; 
-        docker network create mynetworkgcp
-
-        docker run \
-                -it \
-                --rm \
-                -v ${PWD}:/app \
-                -v /app/node_modules \
-                --network mynetworkgcp \
-                -p 80:3000 \
-                -e CHOKIDAR_USEPOLLING=true \
-                -e REACT_APP_VM=VM2 \
-                assigment4
+        sudo apt-get update
+        sudo apt-get install apache2 -y
+        sudo service apache2 restart
+        echo '<!doctype html><html><body><h1>VM 2</h1></body></html>' | tee /var/www/html/index.html\
     "
 
 echo '> Creando VM 3...'
@@ -57,21 +35,10 @@ gcloud compute instances create app3 \
     --image-project debian-cloud \
     --tags webapp \
     --metadata startup-script="#! /bin/bash
-        sudo apt update -y; 
-        sudo apt install docker.io -y; 
-        sudo chmod 666 /var/run/docker.sock; 
-        docker network create mynetworkgcp
-
-        docker run \
-                -it \
-                --rm \
-                -v ${PWD}:/app \
-                -v /app/node_modules \
-                --network mynetworkgcp \
-                -p 80:3000 \
-                -e CHOKIDAR_USEPOLLING=true \
-                -e REACT_APP_VM=VM3 \
-                assigment4
+        sudo apt-get update
+        sudo apt-get install apache2 -y
+        sudo service apache2 restart
+        echo '<!doctype html><html><body><h1>VM 3</h1></body></html>' | tee /var/www/html/index.html\
     "
 
     echo '> VMs creadas'
@@ -83,7 +50,7 @@ gcloud compute instances create app3 \
         --allow tcp:80
    
 ```
-## crear el Network Load Balancer
+## Crear el Network Load Balancer
 ```sh
 echo '*** NETWORK LOAD BALANCER ***'
 echo '> Creando load balancer...'
@@ -98,6 +65,8 @@ gcloud compute target-pools create www-pool \
 
 echo '> Agregar las instancias al target pool'
 gcloud compute target-pools add-instances www-pool \
+    --instances app1,app2,app3
+
 echo '> Agregando una regla de entrada'
 gcloud compute forwarding-rules create www-rule \
     --ports 80 \
@@ -121,7 +90,6 @@ docker run \
         --rm \
         -v ${PWD}:/app \
         -v /app/node_modules \
-        --network mynetworkgcp \
         -p 80:3000 \
         -e CHOKIDAR_USEPOLLING=true \
         -e REACT_APP_VM=VM1 \
